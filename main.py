@@ -6,10 +6,11 @@
 import wx
 import time
 import objects
+import random
 
 X_DIM = 1500
 Y_DIM = 1000
-
+SCRAMBLE_LEN = 25
 
 '''
 PageState is essentially an enum which helps keep track of
@@ -18,6 +19,17 @@ the state of the application.
 class PageState(object):
     TIME = 1
     PAUSED = 2
+
+scramble_direction = {
+    0 : 'R',
+    1 : 'U',
+    2 : 'L',
+    3 : 'D',
+    4 : 'F',
+    5 : 'B'
+}
+
+
 
 '''
 Our subclass of wx.Frame.
@@ -54,12 +66,12 @@ class Page(wx.Frame):
         self.elapsed_time = 0.0
 
         #time_text is a StaticText for the timer text
-        self.time_text = wx.StaticText(self.panel,-1,pos = (X_DIM / 2, 200), style = wx.ALIGN_CENTER_HORIZONTAL)
+        self.time_text = wx.StaticText(self.panel,-1,pos = ((X_DIM - 350) / 2, 200), style = wx.ALIGN_CENTER_HORIZONTAL)
         self.time_text.SetFont(timer_font)
         self.time_text.SetLabel(str(self.elapsed_time))
 
         #summary_text is a StaticText for a brief summary or overview of the users's stats
-        self.summary_text = wx.StaticText(self.panel, -1, pos=(X_DIM / 2, 500), style=wx.ALIGN_CENTER_HORIZONTAL)
+        self.summary_text = wx.StaticText(self.panel, -1, pos=((X_DIM - 350) / 2 - 100, 300), style=wx.ALIGN_CENTER_HORIZONTAL)
         self.summary_text.SetFont(lareger_font)
         self.summary_text.SetLabel(self.get_summary_text())
 
@@ -79,6 +91,7 @@ class Page(wx.Frame):
         #Bind actions to their handlers
         self.Bind(wx.EVT_TIMER, self.update, self.timer)
         self.panel.Bind(wx.EVT_KEY_DOWN, self.onKeyPress)
+        print(self.scramble())
 
 
 
@@ -118,16 +131,44 @@ class Page(wx.Frame):
         self.stats_text.SetLabel(self.get_stats_text())
         self.stats_text.Wrap(300)
 
+    def scramble(self):
+        scramble_code = []
+        prev_direct = None
+        curr_direct = None
+        turn_type = None
+
+        for i in range(SCRAMBLE_LEN):
+
+            #set curr_direct to a random direction
+            if i == 0:
+                curr_direct = random.randint(0, 5)
+            else:
+                while curr_direct == prev_direct:
+                    curr_direct = random.randint(0, 5)
+
+            turn_type = random.randint(0, 2)
+            prev_direct = curr_direct
+
+            #add appropriate letter code to scramble_code
+            if turn_type == 0:
+                scramble_code.append(scramble_direction[curr_direct] + " ")
+            elif turn_type == 1:
+                scramble_code.append(scramble_direction[curr_direct] + "2 ")
+            else:
+                scramble_code.append(scramble_direction[curr_direct] + "' ")
+
+        return ''.join(scramble_code)
+
+
+
 
     def onKeyPress(self, event):
-        print("here")
         keycode = event.GetKeyCode()
         if keycode == wx.WXK_SPACE:
             if self.page_state == PageState.PAUSED:
                 self.start()
             else:
                 self.stop()
-            print("pressed space")
         event.Skip()
 
 
