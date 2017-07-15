@@ -1,20 +1,25 @@
+import wx
+import time
 import objects
+import random
+import wx.lib.plot
 
-#str1 = "13.44, 15.39, 14.61, 15.15, 17.89, 14.80, 11.73, 13.92, 12.67, 13.57, 1,2, 14.37, 22.58, 13.88, 12.93, 15.12, 11.84, 19.52, 17.02, 14.10, 15.19, 16.08, 15.72, 16.05, 16.86, 15.60, 14.09, 13.81, 11.94, 15.67, 13.14, 15.07, 14.75, 17.13, 19.63, 17.79, 11.51, 15.21, 15.27, 12.88, 13.11, 14.63, 13.74, 15.36, 15.54, 17.77, 13.09, 17.23, 14.16, 14.08, 15.67, 13.02, 14.14, 14.63, 16.51, 14.38, 21.04, 13.22, 15.45, 14.71, 16.30, 14.13, 18.01, 16.75".replace(",", "")
+X_DIM = 500
+Y_DIM = 500
 
-str1 = "13.44, 15.39, 14.61, 15.15, 17.89, 14.80, 11.73, 13.92, 12.67, 13.57, 15.52, 14.37, 22.58, 13.88, 12.93, 15.12, 11.84, 19.52, 17.02, 14.10, 15.19, 16.08, 15.72, 16.05, 16.86, 15.60, 14.09, 13.81, 11.94, 15.67, 13.14, 15.07, 14.75, 17.13, 19.63, 17.79, 11.51, 15.21, 15.27, 12.88, 13.11, 14.63, 13.74, 15.36, 15.54, 17.77, 13.09, 17.23, 14.16, 14.08, 15.67, 13.02, 14.14, 14.63, 16.51, 14.38, 21.04, 13.22, 15.45, 14.71, 16.30, 14.13, 18.01, 16.75".replace(",", "")
+class Page(wx.Frame):
 
-times_list = str1.split()
-times_list = [float(i) for i in times_list]
+    def __init__(self, parent, title):
+        super(Page, self).__init__(parent, title=title,
+            size=(X_DIM, Y_DIM))
 
-times = objects.Set()
+        self.Show()
+        #self.canvas = wx.lib.plot.PlotCanvas(self)
 
-for time in times_list:
-    times.add_time(time)
 
-print(times.get_average())
-print(times.get_mean())
-print(times.best_avg5())
-print(times.curr_avg5())
-print(times.curr_avg100())
-print(times)
+
+if __name__ == '__main__':
+
+    app = wx.App()
+    Page(None, title='Hi there')
+    app.MainLoop()

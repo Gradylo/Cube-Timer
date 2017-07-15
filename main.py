@@ -7,6 +7,7 @@ import wx
 import time
 import objects
 import random
+import wx.lib.plot
 
 X_DIM = 1500
 Y_DIM = 1000
@@ -29,6 +30,15 @@ scramble_direction = {
     5 : 'B'
 }
 
+direction_pairs = {
+    0 : 2,
+    2 : 0,
+    1 : 3,
+    3 : 1,
+    4 : 5,
+    5 : 4
+}
+
 
 
 '''
@@ -42,13 +52,15 @@ class Page(wx.Frame):
 
 
         #initialize several different fonts
-        timer_font = wx.Font(48, wx.ROMAN, wx.NORMAL, wx.NORMAL)
-        lareger_font = wx.Font(20, wx.ROMAN, wx.NORMAL, wx.NORMAL)
-        normal_font = wx.Font(14, wx.ROMAN, wx.NORMAL, wx.NORMAL)
+        self.timer_font = wx.Font(48, wx.ROMAN, wx.NORMAL, wx.NORMAL)
+        self.larger_font = wx.Font(20, wx.ROMAN, wx.NORMAL, wx.NORMAL)
+        self.normal_font = wx.Font(14, wx.ROMAN, wx.NORMAL, wx.NORMAL)
 
         self.Move((800, 250))
         self.Show()
         #self.Maximize()
+
+
 
         self.panel = wx.Panel(self)
         self.panel.SetBackgroundColour('BLACK')
@@ -67,18 +79,25 @@ class Page(wx.Frame):
 
         #time_text is a StaticText for the timer text
         self.time_text = wx.StaticText(self.panel,-1,pos = ((X_DIM - 350) / 2, 200), style = wx.ALIGN_CENTER_HORIZONTAL)
-        self.time_text.SetFont(timer_font)
+        self.time_text.SetFont(self.timer_font)
         self.time_text.SetLabel(str(self.elapsed_time))
 
         #summary_text is a StaticText for a brief summary or overview of the users's stats
         self.summary_text = wx.StaticText(self.panel, -1, pos=((X_DIM - 350) / 2 - 100, 300), style=wx.ALIGN_CENTER_HORIZONTAL)
-        self.summary_text.SetFont(lareger_font)
+        self.summary_text.SetFont(self.larger_font)
         self.summary_text.SetLabel(self.get_summary_text())
 
         #stats_text is a StaticText for the users's in-depth statistics
         self.stats_text = wx.StaticText(self.panel, -1, pos = (X_DIM - 300, 100))
-        self.stats_text.SetFont(normal_font)
+        self.stats_text.SetFont(self.normal_font)
         self.stats_text.SetLabel(self.get_stats_text())
+
+        #scramble_text is a StaticText for displaying the next scramble
+        self.scramble_text = wx.StaticText(self.panel, -1, pos=(300, 100), style=wx.ALIGN_CENTER_HORIZONTAL)
+        self.scramble_text.SetFont(self.larger_font)
+        self.scramble_text.SetLabel(self.get_scramble_text())
+        self.scramble_text.Wrap(700)
+
 
         self.ln = wx.StaticLine(self.panel, -1, pos=(X_DIM - 350, 0), size=(0, Y_DIM), style=wx.LI_VERTICAL)
         #self.ln.SetSize((30,30))
@@ -91,8 +110,10 @@ class Page(wx.Frame):
         #Bind actions to their handlers
         self.Bind(wx.EVT_TIMER, self.update, self.timer)
         self.panel.Bind(wx.EVT_KEY_DOWN, self.onKeyPress)
-        print(self.scramble())
 
+
+    def get_scramble_text(self):
+        return "Scramble: " + self.scramble()
 
 
     def get_summary_text(self):
@@ -130,24 +151,29 @@ class Page(wx.Frame):
         self.summary_text.SetLabel(self.get_summary_text())
         self.stats_text.SetLabel(self.get_stats_text())
         self.stats_text.Wrap(300)
+        self.scramble_text.SetLabel(self.get_scramble_text())
 
     def scramble(self):
         scramble_code = []
-        prev_direct = None
-        curr_direct = None
+        curr_direct = random.randint(0, 5)
         turn_type = None
+        availabilities = [True for i in range(6)]
 
         for i in range(SCRAMBLE_LEN):
 
-            #set curr_direct to a random direction
-            if i == 0:
+            #set curr_direct to a random, available direction
+            while availabilities[curr_direct] == False:
                 curr_direct = random.randint(0, 5)
-            else:
-                while curr_direct == prev_direct:
-                    curr_direct = random.randint(0, 5)
 
             turn_type = random.randint(0, 2)
-            prev_direct = curr_direct
+
+            #set directions to available or unavailable
+            for i in range(6):
+                if i == curr_direct or i == direction_pairs[curr_direct]:
+                    availabilities[i] = False
+                else:
+                    availabilities[i] = True
+
 
             #add appropriate letter code to scramble_code
             if turn_type == 0:
